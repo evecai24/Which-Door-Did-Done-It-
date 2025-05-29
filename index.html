@@ -105,7 +105,7 @@
 <body>
   <div id="timer">Time: 90s</div>
   <div id="game-container">
-    <h1 id="room-name">The Library</h1>
+    <h1 id="room-name">Room 1</h1>
     <div id="riddle">Riddle goes here...</div>
     <div class="doors" id="doors"></div>
     <div id="message"></div>
@@ -114,7 +114,7 @@
   <script>
     const rooms = [
       {
-        name: "The Library",
+        name: "Room 1",
         doors: 3,
         correct: 2,
         riddle: "It rolls, it strikes, yet never speaks.",
@@ -123,7 +123,7 @@
         doorLabels: ["The Library", "The Billiards Room", "The Greenhouse"]
       },
       {
-        name: "The Billiards Room",
+        name: "Room 2",
         doors: 4,
         correct: 3,
         riddle: "It speaks without a mouth and hears without ears.",
@@ -132,7 +132,7 @@
         doorLabels: ["The Attic", "The Greenhouse", "The Library", "The Basement"]
       },
       {
-        name: "The Greenhouse",
+        name: "Room 3",
         doors: 4,
         correct: 2,
         riddle: "Though it stands still, it grows and breathes.",
@@ -141,7 +141,7 @@
         doorLabels: ["The Hallway", "The Greenhouse", "The Foyer", "The Kitchen"]
       },
       {
-        name: "The Basement",
+        name: "Room 4",
         doors: 6,
         correct: 4,
         riddle: "A dwelling where light is rarely found.",
@@ -150,7 +150,7 @@
         doorLabels: ["The Garden", "The Attic", "The Study", "The Basement", "The Garage", "The Conservatory"]
       },
       {
-        name: "The Hallway",
+        name: "Room 5",
         doors: 3,
         correct: 2,
         riddle: "It connects what comes before and what’s ahead. You pass through, but never stay.",
@@ -185,14 +185,7 @@
       setTimeout(() => {
         const roomNameEl = document.getElementById('room-name');
         roomNameEl.textContent = room.name;
-
-        // Apply custom font size for Library
-        if (room.name === "The Library") {
-          roomNameEl.classList.add("library-font");
-        } else {
-          roomNameEl.classList.remove("library-font");
-        }
-
+}
         document.getElementById('riddle').textContent = room.riddle;
         gameContainer.style.backgroundImage = `url('${room.background}')`;
 
