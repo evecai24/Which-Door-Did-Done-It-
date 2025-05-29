@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Which Door Did Done It?</title>
+  <style>
+    body {
+      font-family: "Courier New", monospace;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: black; /* fallback background */
+    }
+
+    #game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      text-align: center;
+      opacity: 0.75;
+      transition: opacity 1s ease-in-out;
+      position: relative;
+      image-rendering: pixelated;
+    }
+
+    #game-container.fade-out {
+      opacity: 0;
+    }
+
+    #riddle {
+      margin-bottom: 1em;
+      max-width: 80%;
+      opacity: 1.0;
+      background-color: #002800;
+      border: 2px solid #9A7B4F;
+      padding: 1em;
+      border-radius: 10px;
+      color: #FFFFFF;
+    }
+
+    .doors {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      flex-wrap: wrap;
+    }
+
+    .door {
+      background-color: #654321;
+      border: 2px solid #9A7B4F;
+      padding: 1em;
+      cursor: pointer;
+      transition: transform 0.2s;
+      color: #fff;
+      min-width: 150px;
+      text-align: center;
+    }
+
+    .door:hover {
+      transform: scale(1.1);
+    }
+
+    #message {
+      margin-top: 1em;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    #timer {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 1.2em;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 5px 10px;
+      border-radius: 5px;
+      color: #710C04;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 0.8; }
+      45% { opacity: 0.6; }
+      60% { opacity: 0.4; }
+      75% { opacity: 0.9; }
+    }
+
+    @keyframes bookshelf-glow {
+      0% { background-position: 0 0; }
+      100% { background-position: -400% 0; }
+    }
+
+    #room-name.library-font {
+      font-size: 2.5em;
+      color: #FFFFFF;
+    }
+  </style>
+</head>
+<body>
+  <div id="timer">Time: 90s</div>
+  <div id="game-container">
+    <h1 id="room-name">The Library</h1>
+    <div id="riddle">Riddle goes here...</div>
+    <div class="doors" id="doors"></div>
+    <div id="message"></div>
+  </div>
+
+  <script>
+    const rooms = [
+      {
+        name: "The Library",
+        doors: 3,
+        correct: 2,
+        riddle: "It rolls, it strikes, yet never speaks.",
+        points: 1,
+        background: "library.gif.gif",
+        doorLabels: ["The Library", "The Billiards Room", "The Greenhouse"]
+      },
+      {
+        name: "The Billiards Room",
+        doors: 4,
+        correct: 3,
+        riddle: "It speaks without a mouth and hears without ears.",
+        points: 2,
+        background: "billiards.png.png",
+        doorLabels: ["The Attic", "The Greenhouse", "The Library", "The Basement"]
+      },
+      {
+        name: "The Greenhouse",
+        doors: 4,
+        correct: 2,
+        riddle: "Though it stands still, it grows and breathes.",
+        points: 2,
+        background: "greenhouse.png.png",
+        doorLabels: ["The Hallway", "The Greenhouse", "The Foyer", "The Kitchen"]
+      },
+      {
+        name: "The Basement",
+        doors: 6,
+        correct: 4,
+        riddle: "A dwelling where light is rarely found.",
+        points: 4,
+        background: "basement.png.png",
+        doorLabels: ["The Garden", "The Attic", "The Study", "The Basement", "The Garage", "The Conservatory"]
+      },
+      {
+        name: "The Hallway",
+        doors: 3,
+        correct: 2,
+        riddle: "It connects what comes before and what’s ahead. You pass through, but never stay.",
+        points: 3,
+        background: "hallway.png",
+        doorLabels: ["The Vestibule", "The Hallway", "The Foyer"]
+      }
+    ];
+
+    let currentRoom = 0;
+    let score = 0;
+    let timer;
+    let timeLeft = 90;
+
+    function loadRoom() {
+      clearInterval(timer);
+      timeLeft = 90;
+      document.getElementById('timer').textContent = `Time: ${timeLeft}s`;
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').textContent = `Time: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          document.getElementById('message').textContent = "Time's up! Game Over.";
+        }
+      }, 1000);
+
+      const room = rooms[currentRoom];
+      const gameContainer = document.getElementById('game-container');
+      gameContainer.classList.add('fade-out');
+
+      setTimeout(() => {
+        const roomNameEl = document.getElementById('room-name');
+        roomNameEl.textContent = room.name;
+
+        // Apply custom font size for Library
+        if (room.name === "The Library") {
+          roomNameEl.classList.add("library-font");
+        } else {
+          roomNameEl.classList.remove("library-font");
+        }
+
+        document.getElementById('riddle').textContent = room.riddle;
+        gameContainer.style.backgroundImage = `url('${room.background}')`;
+
+        const doorsDiv = document.getElementById('doors');
+        doorsDiv.innerHTML = '';
+        for (let i = 1; i <= room.doors; i++) {
+          const btn = document.createElement('div');
+          btn.textContent = room.doorLabels[i - 1];
+          btn.className = 'door';
+          btn.onclick = () => chooseDoor(i);
+          doorsDiv.appendChild(btn);
+        }
+
+        gameContainer.classList.remove('fade-out');
+      }, 1000);
+    }
+
+    function chooseDoor(choice) {
+      const room = rooms[currentRoom];
+      const message = document.getElementById('message');
+      if (choice === room.correct) {
+        score += room.points;
+        if (currentRoom === rooms.length - 1) {
+          message.textContent = "You escaped!";
+        } else {
+          message.textContent = "Correct! Proceeding to next room...";
+          setTimeout(() => {
+            currentRoom++;
+            message.textContent = '';
+            loadRoom();
+          }, 2000);
+        }
+      } else {
+        if (currentRoom === rooms.length - 1) {
+          message.textContent = "You did not escape...";
+          clearInterval(timer);
+        } else {
+          message.textContent = "Incorrect. Try again.";
+        }
+      }
+    }
+
+    loadRoom();
+  </script>
+</body>
+</html>
